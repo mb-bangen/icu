@@ -24,7 +24,9 @@ Optional: save your Jira credentials in a `.env` file in this directory:
     JIRA_USERNAME=hello
     JIRA_PASSWORD=world
 
-This is required if you want to process sensitive tickets.
+This is required if you want to process sensitive tickets.  Note: JIRA_PASSWORD needs to be an API Token generated according to the following instructions:
+
+https://confluence.atlassian.com/cloud/api-tokens-938839638.html
 
 ## Usage
 
