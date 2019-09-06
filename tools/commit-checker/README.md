@@ -41,6 +41,14 @@ Run the tool and save the result into REPORT.md; set fixVersion to the upcoming 
         --rev-range "release-63-1..upstream/maint/maint-64"
         > REPORT.md
 
+If the maintenance branch hasn't been cut yet, use upstream/master as the tip:
+
+        --rev-range "release-64-2..upstream/master"
+
+Note 1: These examples assume that your remote named "upstream" points to unicode-org/icu, the source of truth.
+
+Note 2: Please change the previous-release tag (release-63-1, release-64-2, etc) to the correct version at the time you run the tool!
+
 ### Preview the Report
 
 To preview the report, render the Markdown file in your favorite Markdown preview tool, like grip:
