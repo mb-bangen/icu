@@ -17,6 +17,17 @@
  *   07/09/97    helena      Made ParsePosition into a class.
  *   02/22/99    stephen     Removed character literals for EBCDIC safety
  *   11/01/09    kirtig      Added SelectFormat
+ *   03/20/2014  Ellucian    See AUDIT TRAIL below
+
+    AUDIT TRAIL: 8.6.3.2
+    1. Enhancement CR-000110134 - HVT / LVH 03/20/2014
+       Modified to support ansi formats in tm*printf.
+       Look for _BANNER_EXTENSION.
+    AUDIT TRAIL: 8.7.3.1
+    1. Enhancement CR-000110135 - JDC / LVH 1/16/2015
+       Redelivering 8.6.3.2 version for Windows support.  No code changes.
+    AUDIT TRAIL END
+
  ********************************************************************/
 
 #include "unicode/utypes.h"
@@ -1647,7 +1658,19 @@ void MessageFormat::cacheExplicitFormats(UErrorCode& status) {
                 ++i;
             }
             UParseError parseError;
-            Format* formatter = createAppropriateFormat(explicitType, style, formattableType, parseError, status);
+
+//#ifdef _BANNER_EXTENSION
+            Format* formatter = NULL;
+            if (explicitType[0] == '%' ) {
+                addAnsiPattern(argNumber,explicitType);
+                formattableType=Formattable::kAnsiPattern;
+            }
+            else
+                formatter = createAppropriateFormat(explicitType, style, formattableType, parseError, status);
+//#else
+//            Format* formatter = createAppropriateFormat(explicitType, style, formattableType, parseError, status);
+//#endif //_BANNER_EXTENSION
+
             setArgStartFormat(index, formatter, status);
             break;
         }

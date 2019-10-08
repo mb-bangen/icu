@@ -10,6 +10,17 @@
 *
 *   Date        Name        Description
 *   02/29/97    aliu        Creation.
+*   03/20/2014  Ellucian    See AUDIT TRAIL below
+
+    AUDIT TRAIL: 8.6.3.2
+    1. Enhancement CR-000110134 - HVT / LVH 03/20/2014
+       Modified to support ansi formats in tm*printf.
+       Look for _BANNER_EXTENSION.
+    AUDIT TRAIL: 8.7.3.1
+    1. Enhancement CR-000110135 - JDC / LVH 1/16/2015
+       Redelivering 8.6.3.2 version for Windows support.  No code changes.
+    AUDIT TRAIL END
+
 ********************************************************************************
 */
 #ifndef FMTABLE_H
@@ -269,6 +280,9 @@ public:
          * @stable ICU 3.0
          */
         kObject
+//#ifdef _BANNER_EXTENSION // Extend ICU with Ansi type specifiers
+        ,kAnsiPattern
+//#endif //_BANNER_EXTENSION
    };
 
     /**

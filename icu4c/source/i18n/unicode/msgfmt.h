@@ -12,12 +12,26 @@
 *   03/20/97    helena      Finished first cut of implementation.
 *   07/22/98    stephen     Removed operator!= (defined in Format)
 *   08/19/2002  srl         Removing Javaisms
+*   03/20/2014  Ellucian    See AUDIT TRAIL below
+
+    AUDIT TRAIL: 8.6.3.2
+    1. Enhancement CR-000110134 - HVT / LVH 03/20/2014
+       Modified to support ansi formats in tm*printf.
+       Added the include of stdlib.h and changes to support ansi formats in
+       tm*printf.
+       Look for _BANNER_EXTENSION.
+    AUDIT TRAIL: 8.7.3.1
+    1. Enhancement CR-000110135 - JDC / LVH 1/16/2015
+       Redelivering 8.6.3.2 version for Windows support.  No code changes.
+    AUDIT TRAIL END
+
 *******************************************************************************/
 
 #ifndef MSGFMT_H
 #define MSGFMT_H
 
 #include "unicode/utypes.h"
+#include <stdlib.h>
 
 /**
  * \file
@@ -321,6 +335,82 @@ class NumberFormat;
  * @stable ICU 2.0
  */
 class U_I18N_API MessageFormat : public Format {
+
+//#ifdef _BANNER_EXTENSION // Extend ICU with Ansi type specifiers
+
+#ifndef _banmax
+#define _banmax(a,b)  (((a) > (b)) ? (a) : (b))
+#endif
+
+public:
+
+   class U_I18N_API AnsiPatterns {
+       UnicodeString   **fCPattern; // store ansi type masks (%..).
+       int fCPatternCapacity;
+   public:
+       inline AnsiPatterns(){
+           fCPatternCapacity=0;
+           fCPattern=NULL;
+       }
+
+       inline ~AnsiPatterns(){
+           if (fCPattern && fCPatternCapacity) {
+               for (int i=0; i<fCPatternCapacity;i++) {
+                   if (fCPattern[i])
+                       delete fCPattern[i];
+               }
+               free(fCPattern);
+           }
+       }
+       inline UnicodeString* getAt(const int32_t argnum) {
+           return fCPattern[argnum];
+       }
+       inline void add(const int32_t argnum, UnicodeString pat) {
+           const int growInc=10; //add 10 when increase is needed
+           if (fCPatternCapacity==0) {
+               fCPatternCapacity=_banmax(growInc,argnum+1);
+               fCPattern=(UnicodeString**) malloc( sizeof(fCPattern[0]) * fCPatternCapacity);
+
+               for (int i=0;fCPattern && i<fCPatternCapacity;i++)
+                   fCPattern[i]=NULL;
+           }
+           else if (fCPatternCapacity<argnum+1) {
+               int newcap=argnum+growInc;
+               fCPattern=(UnicodeString**) realloc( fCPattern,sizeof(fCPattern[0]) * newcap);
+               for (int i=fCPatternCapacity;fCPattern && i<newcap;i++)
+                   fCPattern[i]=NULL;
+               fCPatternCapacity=newcap;
+           }
+           fCPattern[argnum]=new UnicodeString(pat);
+
+           //assume all strings in the argument list are UChar*
+           //change the Ansi pattern accordingly (for ustdio u_sprintf replacement)
+           switch (pat[pat.length()-1] ){
+               case 's': //ICU 3.6 U - > S
+                   fCPattern[argnum]->replace(pat.length()-1,1,(UChar)'S');
+                   break;
+               case 'c':
+                   fCPattern[argnum]->replace(pat.length()-1,1,(UChar)'C');
+                   break;
+               default:
+                   break;
+           }
+       }
+   };
+private:
+   AnsiPatterns ansiPatterns;
+
+
+public:
+   inline  UnicodeString* getAnsiPattern(const int32_t argnum) {
+       return ansiPatterns.getAt(argnum);
+   }
+   inline  void addAnsiPattern(const int32_t argnum, UnicodeString pat) {
+       ansiPatterns.add(argnum,pat);
+   }
+
+//#endif //_BANNER_EXTENSION
+
 public:
 #ifndef U_HIDE_OBSOLETE_API
     /**

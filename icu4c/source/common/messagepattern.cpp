@@ -10,6 +10,18 @@
 *
 *   created on: 2011mar14
 *   created by: Markus W. Scherer
+*   Modified
+*   03/20/2014  Ellucian    See AUDIT TRAIL below
+
+    AUDIT TRAIL: 8.6.3.2
+    1. Enhancement CR-000110134 - HVT / LVH 03/20/2014
+       Modified to support ansi formats in tm*printf.
+       Look for _BANNER_EXTENSION.
+    AUDIT TRAIL: 8.7.3.1
+    1. Enhancement CR-000110135 - JDC / LVH 1/16/2015
+       Redelivering 8.6.3.2 version for Windows support.  No code changes.
+    AUDIT TRAIL END
+
 */
 
 #include "unicode/utypes.h"
@@ -452,7 +464,7 @@ MessagePattern::parseMessage(int32_t index, int32_t msgStartLength,
         UChar c=msg.charAt(index++);
         if(c==u_apos) {
             if(index==msg.length()) {
-                // The apostrophe is the last character in the pattern. 
+                // The apostrophe is the last character in the pattern.
                 // Add a Part for auto-quoting.
                 addPart(UMSGPAT_PART_TYPE_INSERT_CHAR, index, 0,
                         u_apos, errorCode);  // value=char to be inserted
@@ -593,6 +605,13 @@ MessagePattern::parseArg(int32_t index, int32_t argStartLength, int32_t nestingL
         while(index<msg.length() && isArgTypeChar(msg.charAt(index))) {
             ++index;
         }
+//#ifdef _BANNER_EXTENSION // Extend ICU with Ansi type specifiers
+		if (msg.charAt(index)=='%' ) {
+			while(index<msg.length() && msg.charAt(index)!=u_rightCurlyBrace) {
+				index++;
+			}
+		}
+//#endif //_BANNER_EXTENSION
         int32_t length=index-typeIndex;
         index=skipWhiteSpace(index);
         if(index==msg.length()) {
